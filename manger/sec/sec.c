@@ -23,6 +23,7 @@ void cancel(struct msg_st *msg, sqlite3 *sq);
 void sigup(struct msg_st *msg, sqlite3 *sq);
 void login(struct msg_st *msg, sqlite3 *sq);
 void change_status(sqlite3 *sq, char *id, int status); // 改变用户状态
+int id_isempty(sqlite3 *sq, char *id, struct msg_st *msg);  // 判断id是否存在
 
 struct choose_st
 {
@@ -362,7 +363,8 @@ void sigup(struct msg_st *msg, sqlite3 *sq)
           "status, age, sex, address, phone, money, maxid) "
           "values('%s','%s','%s','0000', 0, 0, '-', '-', '-', 0, '-')",
           maxid, msg->peoplemsg.name, msg->peoplemsg.department);
-  res = sqlite3_get_table(sq, sql, &pres, &row, &col, &permsg);
+  //res = sqlite3_get_table(sq, sql, &pres, &row, &col, &permsg);
+  res = sqlite3_exec(sq, sql, NULL, NULL, &errmsg);
   if (res)
   {
     printf("%d-sqlite3_get_table error : %s\n", __LINE__, permsg);
@@ -382,8 +384,8 @@ void sigup(struct msg_st *msg, sqlite3 *sq)
   strcpy(msg->peoplemsg.id, maxid);
   strcpy(msg->peoplemsg.password, "0000");
   strcpy(msg->msg, "OK");
-  sqlite3_free_table(pres);
-}
+//   sqlite3_free_table(pres);
+ }
 
 void cancel(struct msg_st *msg, sqlite3 *sq)
 {
@@ -409,6 +411,19 @@ void delusr(struct msg_st *msg, sqlite3 *sq)
   int res;
   char *errmsg = NULL;
 
+   res = id_isempty(sq, msg->peoplemsg.id, msg);
+  if(res==0)
+  {
+    printf("%d-%s\n", __LINE__, "id不存在");
+      strcpy(msg->msg, "id不存在");
+      return;
+  }
+  else if(res < 0)
+  {
+      strcpy(msg->msg, "系统错误， 请重试");
+      return;
+  }
+  
   sprintf(sql, "delete from Zhangscorporation where id='%s'",
           msg->peoplemsg.id);
   res = sqlite3_exec(sq, sql, NULL, NULL, &errmsg);
@@ -513,6 +528,19 @@ void chang(struct msg_st *msg, sqlite3 *sq)
   int res;
   char *errmsg = NULL;
 
+  res = id_isempty(sq, msg->chang.changid, msg);
+  if(res==0)
+  {
+    printf("%d-%s\n", __LINE__, "id不存在");
+      strcpy(msg->msg, "id不存在");
+      return;
+  }
+  else if(res < 0)
+  {
+      strcpy(msg->msg, "系统错误， 请重试");
+      return;
+  }
+
   if (msg->permissions == USER)
   {
     if ((strcmp(msg->chang.changkey, "department") == 0) ||
@@ -534,7 +562,7 @@ void chang(struct msg_st *msg, sqlite3 *sq)
     return;
   }
 
-  strcpy(msg->msg, "OK");
+  strcpy(msg->msg, "OK修改完成");
 }
 
 // 改变用户状态
@@ -546,4 +574,31 @@ void change_status(sqlite3 *sq, char *id, int status)
           status, id);
   puts(sql);
   sqlite3_exec(sq, sql, NULL, NULL, &errmsg);
+}
+
+
+// 判断id是否存在  存在返回1， 不存在返回0
+int id_isempty(sqlite3 *sq, char *id, struct msg_st *msg)
+{
+  char sql[SQLSIZE] = "";
+  int res;
+  char *errmsg = NULL;
+  sprintf(sql, "insert into Zhangscorporation(id) values('%s')", id);
+  puts(sql);
+  res = sqlite3_exec(sq, sql, NULL, NULL, &errmsg);
+  if (res)
+  {
+    if(res==SQLITE_CONSTRAINT)
+      return 1;
+    printf("%d-%s\n", __LINE__, errmsg);
+    return -1;
+  }
+   sprintf(sql, "delete from Zhangscorporation where id='%s'", id);
+  res = sqlite3_exec(sq, sql, NULL, NULL, &errmsg);
+  if (res)
+  {
+    printf("%d-%s\n", __LINE__, errmsg);
+    return-2;
+  }
+  return 0;
 }

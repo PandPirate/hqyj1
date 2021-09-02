@@ -49,9 +49,10 @@ int main(int argc, char *argv[])
 		ERR("connect");
 		return -2;
 	}
+	system("clear");
 	while (1)
 	{
-		system("clear");
+		
 		flag = 1;
 		printf("**************************************\n");
 		printf("***********1 登录*********************\n");
@@ -93,7 +94,6 @@ int main(int argc, char *argv[])
 			printf("输入错误，请重新输入\n");
 			break;
 		}
-	
 	}
 
 	close(sfd);
@@ -154,7 +154,9 @@ int login(int sfd)
 		printf("%d-%s\n", __LINE__, msg.msg);
 		return -4;
 	}
-
+	printf("输入任意字符清屏\n");
+	getchar();
+	system("clear");
 	return msg.permissions; // 管理员成功返回1 普通员工返回0
 }
 
@@ -200,7 +202,9 @@ int root(int sfd)
 	default:
 		printf("输入错误，请重新输入\n");
 	}
-	
+	printf("输入任意字符清屏\n");
+	getchar();
+	system("clear");
 	return 0;
 }
 
@@ -234,6 +238,9 @@ int sigup(int sfd)
 	printf("注册成功\n");
 	printf("id:%s\n密码:%s\n姓名:%s\n部门:%s\n", msg.peoplemsg.id, msg.peoplemsg.password,
 		   msg.peoplemsg.name, msg.peoplemsg.department);
+	printf("输入任意字符清屏\n");
+	getchar();
+	system("clear");
 	return 0;
 }
 
@@ -258,6 +265,9 @@ int delusr(int sfd)
 		return -4;
 	}
 	printf("%s 删除成功\n", msg.peoplemsg.id);
+	printf("输入任意字符清屏\n");
+	getchar();
+	system("clear");
 	return 0;
 }
 
@@ -265,7 +275,7 @@ int chang(int sfd)
 {
 	int res;
 	char choose;
-	
+
 	memset(&(msg.peoplemsg), 0, sizeof(msg.peoplemsg));
 	memset(&(msg.chang), 0, sizeof(msg.chang));
 	if (msg.permissions == ROOT)
@@ -280,12 +290,8 @@ int chang(int sfd)
 			return 0;
 		msg.chang.changid[strlen(msg.chang.changid) - 1] = 0;
 	}
-	//判断id
-	if (msg.permissions == USER && strcmp(msg.chang.changid, msg.idself))
-	{
-		printf("%d-你无权限修改此id信息\n", __LINE__);
-		return -1;
-	}
+	else
+		strcpy(msg.chang.changid, msg.idself);
 	printf("请选择修改内容\n");
 	printf("***********************************************\n");
 	printf("***************  空格返回上一级******************\n");
@@ -339,12 +345,11 @@ int chang(int sfd)
 		printf("请输入新薪资 ： ");
 		break;
 	default:
-		printf("输入错误请重新输入");
-		return -1;
+		return 0;
 	}
 	fgets(msg.chang.changvalues, sizeof(msg.chang.changvalues), stdin);
 	if (*msg.chang.changvalues == ' ')
-			return 0;
+		return 0;
 	msg.chang.changvalues[strlen(msg.chang.changvalues) - 1] = 0;
 
 	msg.opt = CHANG;
@@ -359,7 +364,10 @@ int chang(int sfd)
 		printf("%d-%s\n", __LINE__, msg.msg);
 		return -4;
 	}
-	
+	printf("%d-%s\n", __LINE__, msg.msg + 2);
+	printf("输入任意字符清屏\n");
+	getchar();
+	system("clear");
 	return 0;
 }
 
@@ -415,7 +423,7 @@ int find(int sfd)
 		ERR("send");
 		return -1;
 	}
-	printf("%-10s%-10s%-10s%-10s%-10s%-10s%-10s%-10s%-10s%-10s\n", "ID", "名字", "年龄", "性别", "部门", "住址", "电话", "薪资", "密码", "状态");
+	printf("%-9s %-9s %-9s %-9s %-9s %-9s %-9s %-9s %-9s %-9s \n", "ID", "名字", "年龄", "性别", "部门", "住址", "电话", "薪资", "密码", "状态");
 	printf("--------------------------------------------------------------------------\n");
 	while (1)
 	{
@@ -438,21 +446,23 @@ int find(int sfd)
 		else
 		{
 
-			printf("%-10s%-10s%-10d%-10c%-10s%-10s%-10s%-10d%-10s%-10d\n", msg.peoplemsg.id,
+			printf("%-7s %-7s %-7d %-7c %-7s %-7s %-7s %-7d %-7s %-7d \n", msg.peoplemsg.id,
 				   msg.peoplemsg.name, msg.peoplemsg.age, msg.peoplemsg.sex, msg.peoplemsg.department,
 				   msg.peoplemsg.address, msg.peoplemsg.phone, msg.peoplemsg.money, msg.peoplemsg.password,
 				   msg.peoplemsg.status);
 			printf("--------------------------------------------------------------------------\n");
 		}
 	}
-
+	printf("输入任意字符清屏\n");
+	getchar();
+	system("clear");
 	return 0;
 }
 
 int user(int sfd)
 {
 	char choose;
-	
+
 	printf("***********************************************\n");
 	printf("**************5 查寻信息************************\n");
 	printf("**************6 修改信息************************\n");
@@ -476,6 +486,8 @@ int user(int sfd)
 	default:
 		printf("输入错误，请重新输入\n");
 	}
-	
+	printf("输入任意字符清屏\n");
+	getchar();
+	system("clear");
 	return 0;
 }
