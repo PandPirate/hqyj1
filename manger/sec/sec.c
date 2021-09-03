@@ -394,7 +394,7 @@ void cancel(struct msg_st *msg, sqlite3 *sq)
   char *errmsg = NULL;
   sprintf(sql, "update Zhangscorporation set status=%d where id='%s' ",
           OFFLINE, msg->idself);
-  // puts(sql);
+   puts(sql);
   res = sqlite3_exec(sq, sql, NULL, NULL, &errmsg);
   if (res)
   {
@@ -424,6 +424,13 @@ void delusr(struct msg_st *msg, sqlite3 *sq)
       return;
   }
   
+  if(strcmp(msg->peoplemsg.id, ROOTID)==0)
+  {
+    strcpy(msg->msg, "权限不足， 无法删除管理员信息");
+    return;
+  }
+
+
   sprintf(sql, "delete from Zhangscorporation where id='%s'",
           msg->peoplemsg.id);
   res = sqlite3_exec(sq, sql, NULL, NULL, &errmsg);
